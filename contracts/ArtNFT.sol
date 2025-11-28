@@ -29,7 +29,7 @@ contract ArtNFT is ERC721, ZamaEthereumConfig {
 
         _safeMint(minter, tokenId);
 
-        eaddress encodedOwner = _setEncodedOwner(tokenId, encodedOwnerInput, inputProof, minter);
+        eaddress encodedOwner = _setEncodedOwner(tokenId, encodedOwnerInput, inputProof);
 
         _nextTokenId = tokenId + 1;
         _hasMinted[minter] = true;
@@ -48,17 +48,17 @@ contract ArtNFT is ERC721, ZamaEthereumConfig {
         externalEaddress encodedOwnerInput,
         bytes calldata inputProof
     ) external {
-        address owner = ownerOf(tokenId);
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ArtNFT: not token owner or approved");
+        address owner = _requireOwned(tokenId);
+        _checkAuthorized(owner, _msgSender(), tokenId);
 
-        eaddress encodedOwner = _setEncodedOwner(tokenId, encodedOwnerInput, inputProof, owner);
+        eaddress encodedOwner = _setEncodedOwner(tokenId, encodedOwnerInput, inputProof);
 
         emit EncodedOwnerUpdated(tokenId, encodedOwner);
     }
 
     /// @notice Returns the encrypted owner handle for a token.
     function encodedOwnerOf(uint256 tokenId) external view returns (eaddress) {
-        _requireMinted(tokenId);
+        _requireOwned(tokenId);
         return _encodedOwners[tokenId];
     }
 
@@ -80,16 +80,15 @@ contract ArtNFT is ERC721, ZamaEthereumConfig {
     function _setEncodedOwner(
         uint256 tokenId,
         externalEaddress encodedOwnerInput,
-        bytes calldata inputProof,
-        address beneficiary
+        bytes calldata inputProof
     ) internal returns (eaddress) {
-        _requireMinted(tokenId);
+        address owner = _requireOwned(tokenId);
         eaddress encodedOwner = FHE.fromExternal(encodedOwnerInput, inputProof);
         require(FHE.isInitialized(encodedOwner), "ArtNFT: encoded owner not initialized");
 
         _encodedOwners[tokenId] = encodedOwner;
 
-        FHE.allow(encodedOwner, beneficiary);
+        FHE.allow(encodedOwner, owner);
         FHE.allowThis(encodedOwner);
 
         return encodedOwner;
