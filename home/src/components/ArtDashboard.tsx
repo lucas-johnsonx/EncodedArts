@@ -6,7 +6,7 @@ import { useEthersSigner } from '../hooks/useEthersSigner';
 import { useZamaInstance } from '../hooks/useZamaInstance';
 import '../styles/ArtDashboard.css';
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+// const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const SEPOLIA_CHAIN_ID = 11155111;
 
 const formatValue = (value?: bigint) => (value ? value.toString() : '—');
@@ -31,7 +31,7 @@ export function ArtDashboard() {
   const [decrypting, setDecrypting] = useState(false);
   const [toast, setToast] = useState('');
 
-  const isContractReady = CONTRACT_ADDRESS !== ZERO_ADDRESS;
+  const isContractReady = true;
   const isOnSepolia = chainId === undefined || chainId === null || chainId === SEPOLIA_CHAIN_ID;
 
   const totalMintedQuery = useReadContract({
